@@ -1,4 +1,5 @@
 import System.IO
+import System.Environment (getArgs)
 import ParseFile (parseTree, parseData)
 import DataStructures (Tree(..))
 import Control.Monad (forM_)
@@ -13,27 +14,32 @@ treeFind all@(x:xs) (Node attr thresh leftTree rightTree)
     | all!!fromIntegral attr <= thresh = treeFind all leftTree
     | otherwise = treeFind all rightTree
 
-
 ------------------------------------------------------------------------------------------------
+
+cleanString :: String -> String
+cleanString str = filter (`notElem` ['\r', '\"']) str
 
 main :: IO ()
 main = do
-    -- Reading and parsing the tree from tree.txt
-    treeContent <- readFile "tree.txt"
-    let parsedTree = parseTree treeContent
-    
-    case parsedTree of
-        Left err -> print $ "Error parsing tree: " ++ show err
-        Right tree -> do
-            -- If the tree is successfully parsed, proceed to parse the data
-            dataContent <- readFile "data.txt"
-            let dataLines = lines dataContent  -- Split the content into lines
-            forM_ dataLines $ \line -> do
-                let parsedData = parseData line  -- Parse each line individually
-                case parsedData of
-                    Left err -> print $ "Error parsing data: " ++ show err
-                    Right dataValues -> do
-                        -- Using the treeFind function with the parsed data and tree
-                        let result = treeFind dataValues tree
-                        putStrLn $ filter (`notElem` "\"\r") result
+    args <- getArgs  -- Get command-line arguments
+    case args of
+        [treeFilePath, dataFilePath] -> do
+            -- Read and parse the tree from the tree file
+            treeContent <- readFile treeFilePath
+            let parsedTree = parseTree treeContent
+            
+            case parsedTree of
+                Left err -> print $ "Error parsing tree: " ++ show err
+                Right tree -> do
+                    -- If the tree is successfully parsed, proceed to parse the data
+                    dataContent <- readFile dataFilePath
+                    let dataLines = lines dataContent
+                    forM_ dataLines $ \line -> do
+                        let parsedData = parseData line
+                        case parsedData of
+                            Left err -> print $ "Error parsing data: " ++ show err
+                            Right dataValues -> do
+                                let result = treeFind dataValues tree
+                                print $ cleanString result  -- Clean and print the result
+        _ -> putStrLn "Usage: program <tree file path> <data file path>"
 
