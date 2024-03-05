@@ -21,12 +21,15 @@ cleanString str = filter (`notElem` ['\r', '\"']) str
 
 main :: IO ()
 main = do
-    args <- getArgs  -- Get command-line arguments
+    -- Get command-line arguments
+    args <- getArgs  
     case args of
+        -- when args is a list of two elements, bind the files
         [treeFilePath, dataFilePath] -> do
             -- Read and parse the tree from the tree file
             treeContent <- readFile treeFilePath
             let parsedTree = parseTree treeContent
+            print parsedTree
             
             case parsedTree of
                 Left err -> print $ "Error parsing tree: " ++ show err

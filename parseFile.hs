@@ -2,18 +2,25 @@ module ParseFile (parseTree, parseData) where
 
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import Control.Applicative ((<*>), (<$>))
 import DataStructures (Tree(..))
 
 ----------------------------------------------------------------------
 
--- Parser for attributes (assuming they are integers)
-attrParser :: Parser Integer
-attrParser = read <$> many1 digit
+-- Parser for attributes 
+integerParser :: Parser Integer
+-- Consists of many digits, then convert to Integer
+integerParser = read <$> many1 digit
 
--- Parser for thresholds (assuming they are doubles)
-threshParser :: Parser Double
-threshParser = read <$> (many1 digit <* char '.' <* many1 digit)
+-- Parser for thresholds
+{- 
+    At first parse the integral part, then concate it with the rest when it is done.
+    The rest parse the decimal point and then add it as a head to the list. Tail is the 
+    fractional part then. At the end convert it to the double. 
+-}
+doubleParser :: Parser Double
+doubleParser = read <$> ((++) <$> many1 digit <*> ((:) <$> char '.' <*> many1 digit))
+
+----------------------------------------------------------------------
 
 -- Parser for leaf nodes, allowing spaces before "Leaf"
 leafParser :: Parser (Tree attr thresh)
@@ -21,8 +28,8 @@ leafParser = Leaf <$> (spaces *> string "Leaf: " *> many1 (noneOf "\n"))
 
 -- Parser for node constructs, allowing variable spaces before "Node"
 nodeParser :: Parser (Tree Integer Double)
-nodeParser = Node <$> (spaces *> string "Node: " *> attrParser <* char ',' <* spaces)
-                  <*> (threshParser <* spaces)
+nodeParser = Node <$> (spaces *> string "Node: " *> integerParser <* char ',' <* spaces)
+                  <*> (doubleParser <* spaces)
                   <*> (spaces *> treeParser)
                   <*> (spaces *> treeParser)
 
@@ -36,11 +43,8 @@ parseTree input = parse (treeParser <* eof) "" input
 
 ----------------------------------------------------------------------
 
-numberParser :: Parser Double
-numberParser = read <$> (many1 digit <* char '.' <* many1 digit)
-
 dataParser :: Parser [Double]
-dataParser = numberParser `sepBy` char ','
+dataParser = doubleParser `sepBy` char ','
 
 parseData :: String -> Either ParseError [Double]
 parseData input = parse (dataParser <* eof) "" input
