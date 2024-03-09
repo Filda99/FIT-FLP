@@ -1,98 +1,76 @@
 import DataStructures (DataSet, ValueFromDataset)
-import Data.List (nub, group, sort)
-
-{-|
-  Function: createHalfs
-  Description: Calculates averages between next and prev. number in dataset.
-
-  Parameters:
-    - paramName1: xs: A list of (Double, String) pairs to process.
-
-  Returns:  A list of (Double, Double) pairs, where the first Double is the average
-            of one column elements from the input dataset, and the second Double is 0.0.
--}
-createHalfs :: [(Double, String)] -> [(Double, Double)]
-createHalfs []  = []
-createHalfs [_] = []  -- list has only one elem
-createHalfs xs  = zipWith avg (init xs) (tail xs)
-    where avg (a, _) (b, _) = ( (a + b)/2, 0.0 )
-
-
------------------------------------------------------------------------
-
-{-|
-  Function: getClasses, getClassesFromDataset
-  Description: Extracts a list of unique class names from the last column of a 2D list.
-
-  Parameters:
-    - DataSet: A list of (Double, String) pairs to process.
-
-  Returns:  A list of (Double, Double) pairs, where the first Double is the average
-            of one column elements from the input dataset, and the second Double is 0.0.
--}
-getClassesFromDataset :: (Eq a) => [a] -> [a]
-getClassesFromDataset [] = []
-getClassesFromDataset (x:xs)
-    | elem x xs = getClassesFromDataset xs
-    | otherwise = x : getClassesFromDataset xs
-
-getClasses :: DataSet -> [ValueFromDataset]
-getClasses xs = getClassesFromDataset (map last xs)
-
------------------------------------------------------------------------
-
--- LeftNode a RightNode vytvoreni. Ke kazde tride mas 0 [("A", 0), ("B", 0), ...]
--- a bude se to inkrementovat podle zastoupeni
-createNodes :: [ValueFromDataset] -> [(ValueFromDataset, Integer)]
-createNodes classes = map (\x -> (x, 0)) classes
-
--- Inkrementace tridy v danem podstromu
--- incrementClass :: (Eq String) => String -> [(String, Integer)] -> [(String, Integer)]
--- incrementClass targetClass pairs = map updatePair pairs
---   where
---     updatePair (cls, num) = if cls == targetClass then (cls, num + 1) else (cls, num)
-
-
-
-{-
-    Parameters:
-        - a: index of row in dataset
-        - a: number to be compared to
-        - [ValueFromDataset]: column of dataset - doubles
-    Returns:
-        - [(a, Integer)]: Pairs of classes and it's representations
--}
--- Prvne vytvor dva podstromy - leftNode a rightNode
--- Pak zavolej funkci calcGini, ktere predas hodnotu na i. radku z datasetu a compareHodnotu (polovina)
--- a ta na zaklade toho vraci 
--- 1. param = index
--- 2. param = compare number
--- 3. param = sloupec
--- return List dvojic (trida, giniIndex)
--- calcNumFromDataset :: Integer -> Double -> [ValueFromDataset] -> [(String, Integer)]
--- calcNumFromDataset _ _ [] = []
--- calcNumFromDataset index compareNumber (x:xs) =
---   let 
-
-
-
--- Count occurrences of each class
-countClasses :: [String] -> [(String, Integer)]
-countClasses classes = map (\grp -> (head grp, toInteger $ length grp)) . group . sort $ classes
+import Data.List (nub, group, sort, sortBy)
 
 
 
 -- [(7, "No"), (12, "No"), (18, "Yes"), (35, "Yes"), (38, "Yes"), (50, "No"), (83, "No")]
 
 
+
 {-
-- Vypocet total gini impurity pro threshold.
-    Vstupy:
-      [(Double, String)]  =   (hodnota, trida)
-      Double              =   threshold 
+Helping function for getGiniForColumn.
+Function will create candidates for threshold for the given column.
+
+  Inputs:
+    [(Double, String)]  - rows from dataset (value from dataset, class) 
     
-    Vystup:
-      Gini impurity pro threshold.
+  Returns:
+    List of candidates (element count is count of input rows - 1).
+-}
+createHalfs :: [(Double, String)] -> [Double]
+createHalfs []  = []
+createHalfs [_] = []  -- list has only one elem
+createHalfs xs  = zipWith avg (init xs) (tail xs)
+    where avg (a, _) (b, _) = (a + b) / 2
+
+
+{-
+For column calculate and return the smallest gini impurity.
+
+  Inputs:
+    [(Double, String)]  - rows from dataset (value from dataset, class) 
+    
+  Returns:
+    Smallest pair for this column where fst is Gini impurity and snd is threshold. 
+-}
+getGiniForColumn :: [(Double, String)] -> (Double, Double)
+getGiniForColumn pairs =
+  -- Vytvor kandidaty na thresh
+  let candidates = createHalfs pairs
+      -- Vytvor list s gini indexy
+      listGinis = [(calcThreshImpurity pairs candidate, candidate) | candidate <- candidates]
+      sortedGinis = sortBy (\(a,_) (b,_) -> compare a b) listGinis
+      initGini = head sortedGinis
+  in initGini
+
+
+{-
+Create pair (class, count) for left and right subtree.
+At first, sort classes so the same are next each other.
+Then group them - it will create a list of lists, where in each
+sublist there are only the same classes.
+In the end create a pair where first elem will be class name
+and the second elem will be count of elements in sublist.
+
+  Inputs:
+    [String] - Classes
+    
+  Returns:
+    [(String, Integer)]   =  (class, count) 
+-}
+countClasses :: [String] -> [(String, Integer)]
+countClasses classes = map (\grp -> (head grp, toInteger $ length grp)) . group . sort $ classes
+
+
+{-
+Calculation of total gini impurity for selected threshold.
+
+  Inputs:
+    [(Double, String)]  - rows from dataset (value from dataset, class) 
+    Double              - threshold 
+    
+  Returns:
+    Gini impurity for threshold.
 -}
 calcThreshImpurity :: [(Double, String)] -> Double -> Double
 calcThreshImpurity pairs threshold =
@@ -117,12 +95,13 @@ calcThreshImpurity pairs threshold =
 
 
 {-
-- Vypocet gini impurity pro jeden list.
-    Vstupy:
-      [(String, Integer)]  = (trida, pocet zastoupeni)
+Calculation of Gini impurity for one leaf.
+
+    Inputs:
+      [(String, Integer)] - rows from dataset fulfilling the condition (class, count)
     
-    Vystup:
-      Gini impurity pro list.
+    Returns:
+      Gini impurity for a leaf.
 -}
 calcLeafImpurity :: [(String, Integer)] -> Double
 calcLeafImpurity pair = 
