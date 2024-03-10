@@ -1,10 +1,61 @@
-import DataStructures (DataSet, ValueFromDataset)
-import Data.List (nub, group, sort, sortBy)
+import DataStructures (DataSet, ValueFromDataset(..))
+import Data.List (nub, group, sort, sortBy, transpose, minimumBy)
+import Data.Function (on)
 
 
 
--- [(7, "No"), (12, "No"), (18, "Yes"), (35, "Yes"), (38, "Yes"), (50, "No"), (83, "No")]
+{-
+For given dataset calculate and return the smallest gini impurity with the threshold that will be used.
 
+  Inputs:
+    DataSet  - 2D field which contains:
+                  - Doubles - [Numeric Double]
+                  - Classes - [Label String]  
+    
+  Returns:
+    Smallest pair for given dataset where fst is Threshold and snd is Column Index = Attribute. 
+
+  Notes:
+    For any other node but initial the parameter dataset should be adjusted based on
+    node before (only those rows which meets the condition - threshold).
+    This function is little bit complex so every line is greatly commented because i will
+    forget the thought process... :)
+-}
+getGiniForDataset :: DataSet -> (Double, Int)
+getGiniForDataset dataset =
+  let 
+      -- Extract class labels from last column
+      -- Using transpose we can work with columns
+      classLabels = [s | Label s <- last (transpose dataset)]
+      
+      -- Get only numerical columns from dataset 
+      -- (excluding the classes - they will be added to each numerical column)
+      numericalColumns = init (transpose dataset)
+
+      -- For each column with doubles, extract the double values
+      extractDoubles col = [x | Numeric x <- col]
+
+      -- Pair each doubles column with classes
+      pairedColumns = [(extractDoubles col, classLabels) | col <- numericalColumns]
+
+      -- Calculate Gini for each column, storing result and assign an index to each pair.
+      -- 1. getGiniForColumn takes list of pairs (value, class) so we need at first zip
+      -- all doubles from column with the class
+      -- 2. getGiniForColumn is applied to created list of touples and returns list of
+      -- pairs (giniIndex, thresh). 
+      -- 3. Add attribute (index of column) to the touples.
+      allGinis = zip [0..] (map (getGiniForColumn . (\(a,b) -> zip a b)) pairedColumns)
+
+      -- Find the column with the smallest Gini coefficient
+      (columnIndex, (_, thresh)) = minimumBy (compare `on` snd . snd) allGinis
+
+      -- Sort gini indexes by gini index ascending
+      sortedGinis = sortBy (\(_, (giniA, _)) (_, (giniB, _)) -> compare giniA giniB) allGinis
+
+      -- Get the smallest gini index and return only threshold and attribute
+      (colIdFinal, (_, threshFinal)) = head sortedGinis 
+
+  in (threshFinal, colIdFinal)
 
 
 {-
@@ -35,12 +86,18 @@ For column calculate and return the smallest gini impurity.
 -}
 getGiniForColumn :: [(Double, String)] -> (Double, Double)
 getGiniForColumn pairs =
-  -- Vytvor kandidaty na thresh
-  let candidates = createHalfs pairs
-      -- Vytvor list s gini indexy
+ 
+  let 
+      -- Create candidates for thresholds but first sort it
+      sortedPairs = sortBy (\(a,_) (b,_) -> compare a b) pairs
+      candidates = createHalfs sortedPairs
+      -- Create a list of gini indexes
       listGinis = [(calcThreshImpurity pairs candidate, candidate) | candidate <- candidates]
+      -- Sort gini indexes by gini index ascending
       sortedGinis = sortBy (\(a,_) (b,_) -> compare a b) listGinis
+      -- Get the smallest gini index and return it
       initGini = head sortedGinis
+
   in initGini
 
 
@@ -104,11 +161,11 @@ Calculation of Gini impurity for one leaf.
       Gini impurity for a leaf.
 -}
 calcLeafImpurity :: [(String, Integer)] -> Double
-calcLeafImpurity pair = 
+calcLeafImpurity pair =
   let listOfClasses = map snd pair -- [0, 1] zastoupeni trid
       numberOfClasses = fromIntegral $ sum listOfClasses -- Convert to Double for floating-point division
 
-      classesProbabilities = map (\x -> (fromIntegral x / numberOfClasses) ** 2) listOfClasses 
+      classesProbabilities = map (\x -> (fromIntegral x / numberOfClasses) ** 2) listOfClasses
       sumOfProbabilities = sum classesProbabilities
       impurity = 1 - sumOfProbabilities
   in impurity
