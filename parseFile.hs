@@ -23,7 +23,7 @@ doubleParser = read <$> ((++) <$> many1 digit <*> ((:) <$> char '.' <*> many1 di
 ----------------------------------------------------------------------
 
 -- Parser for leaf nodes, allowing spaces before "Leaf"
-leafParser :: Parser (Tree attr thresh)
+leafParser :: Parser (Tree Integer Double)
 leafParser = Leaf <$> (spaces *> string "Leaf: " *> many1 (noneOf "\n"))
 
 -- Parser for node constructs, allowing variable spaces before "Node"

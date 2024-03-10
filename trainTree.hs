@@ -1,7 +1,39 @@
-import DataStructures (DataSet, ValueFromDataset(..))
+import DataStructures (DataSet, ValueFromDataset(..), Tree (..))
 import Data.List (nub, group, sort, sortBy, transpose, minimumBy)
 import Data.Function (on)
 
+
+-- buildTree :: DataSet -> (Tree Integer Double)
+-- -- buildTree :: DataSet -> (Double, Int, Double)
+-- buildTree dataset =
+--   let (thresh, attr, gini) = getGiniForDataset dataset
+--       classesNames = countClasses [s | Label s <- last (transpose dataset)]
+--   in 
+--     if length classesNames == 1 then Leaf (fst (head classesNames)) 
+--     else 
+--       let leftLeafClasses = splitData dataset left
+--           rightLeafClasses = splitData dataset right
+--           where splitData dataset cond = 
+--             | cond == left = filter (\ row |  ( (\(Numeric x) -> x) (row !! attr)) < thresh) dataset
+--             | otherwise    = filter (\ row |  ( (\(Numeric x) -> x) (row !! attr)) >= thresh) dataset
+    
+
+buildTree :: DataSet -> Tree Int Double
+buildTree dataset =
+  let 
+    (thresh, attr, gini) = getGiniForDataset dataset
+    classesNames = countClasses [s | Label s <- last (transpose dataset)]
+  in 
+    if length classesNames == 1 
+    then Leaf (fst (head classesNames)) 
+    else 
+      let 
+        splitData ds cond = filter (\row -> let Numeric x = row !! attr in cond x) ds
+        leftLeafClasses = splitData dataset (< thresh)
+        rightLeafClasses = splitData dataset (>= thresh)
+      in Node attr thresh (buildTree leftLeafClasses) (buildTree rightLeafClasses)
+
+      
 
 
 {-
@@ -21,7 +53,8 @@ For given dataset calculate and return the smallest gini impurity with the thres
     This function is little bit complex so every line is greatly commented because i will
     forget the thought process... :)
 -}
-getGiniForDataset :: DataSet -> (Double, Int)
+-- getGiniForDataset :: DataSet -> (Double, Int)
+getGiniForDataset :: DataSet -> (Double, Int, Double)
 getGiniForDataset dataset =
   let 
       -- Extract class labels from last column
@@ -53,9 +86,10 @@ getGiniForDataset dataset =
       sortedGinis = sortBy (\(_, (giniA, _)) (_, (giniB, _)) -> compare giniA giniB) allGinis
 
       -- Get the smallest gini index and return only threshold and attribute
-      (colIdFinal, (_, threshFinal)) = head sortedGinis 
+      (colIdFinal, (gini, threshFinal)) = head sortedGinis 
 
-  in (threshFinal, colIdFinal)
+  -- in (threshFinal, colIdFinal)
+  in (threshFinal, colIdFinal, gini)
 
 
 {-

@@ -14,8 +14,6 @@ data ValueFromDataset =
     Numeric Double 
     | Label String
     deriving (Show, Eq)
-    
 
 type Row = [ValueFromDataset]
 type DataSet = [Row]
-
