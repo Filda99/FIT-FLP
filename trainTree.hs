@@ -1,3 +1,5 @@
+module TrainTree where
+
 import DataStructures (DataSet, ValueFromDataset(..), Tree (..))
 import Data.List (nub, group, sort, sortBy, transpose, minimumBy)
 import Data.Function (on)

@@ -1,6 +1,4 @@
-{-# LANGUAGE DerivingStrategies #-} -- Allow specifying the strategy for each derived instance explicitly
-
-module DataStructures (Tree(..), DataSet, ValueFromDataset(..)) where
+module DataStructures (Tree(..), DataSet, ValueFromDataset(..), Row) where
 
 data Tree attr thresh = 
     EmptyTree 

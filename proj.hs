@@ -1,6 +1,6 @@
 import System.IO
 import System.Environment (getArgs)
-import ParseFile (parseTree, parseData)
+import ParseFile (parseTree, parseData, parseTraining)
 import DataStructures (Tree(..))
 import Control.Monad (forM_)
 
@@ -24,12 +24,21 @@ main = do
     -- Get command-line arguments
     args <- getArgs  
     case args of
+        [filePath] -> do
+            -- Perform parsing based on the file path
+            fileContent <- readFile filePath
+            let parsedContent = parseTraining fileContent
+            case parsedContent of
+                Left err -> putStrLn $ "Error parsing file: " ++ show err
+                Right result -> do
+                    putStrLn $ "Done"
+                    print result
+
         -- when args is a list of two elements, bind the files
         [treeFilePath, dataFilePath] -> do
             -- Read and parse the tree from the tree file
             treeContent <- readFile treeFilePath
             let parsedTree = parseTree treeContent
-            print parsedTree
             
             case parsedTree of
                 Left err -> print $ "Error parsing tree: " ++ show err
