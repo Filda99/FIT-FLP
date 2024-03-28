@@ -8,7 +8,6 @@ import Text.Parsec
 
 import Control.Monad.IO.Class (liftIO)
 
-import Debug.Trace (trace)
 
 
 ----------------------------------------------------------------------
@@ -95,7 +94,9 @@ rowParser = valueParser `sepBy` char ','
 
 -- Parse the dataset
 datasetParser :: Parser [[ValueFromDataset]]
-datasetParser = rowParser `sepEndBy` newline
+datasetParser = endBy rowParser newline <* optional newline -- Adjusted to consume extra newlines
+
+
 
 ----------------------------------------------------------------------
 
@@ -109,4 +110,8 @@ parseData input = parse (dataParser <* (skipMany (skipMany1 newline *> spaces)) 
 
 -- Top-level parser to parse the entire training input
 parseTraining :: String -> Either ParseError DataSet
-parseTraining input = parse (datasetParser <* (skipMany (skipMany1 newline *> spaces)) <* eof) "" input
+parseTraining input = parse (skipMany (skipMany1 newline *> spaces) *> datasetParser <* eof) "" input
+
+
+
+

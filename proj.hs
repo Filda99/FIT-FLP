@@ -2,10 +2,19 @@ import System.IO
 import System.Environment (getArgs)
 import ParseFile (parseTree, parseData, parseTraining)
 import DataStructures (Tree(..))
+import TrainTree(buildTree)
 import Control.Monad (forM_)
 
--- vstup: [2.4, 1.3] -> Tree attr thresh -> String
--- treeFind vrati listovou hodnotu dle toho, jak se rozhoduje v uzlech
+{-
+Tree find function will recursively traverse the tree based on the given data.
+
+    Inputs:
+        [Double] - List of doubles which represents the data.
+        Tree - Decision tree with nodes and leaves.
+
+    Returns:
+        String - The class name which is found in the tree.
+-}
 treeFind :: (Ord a, Integral attr) => [a] -> Tree attr a -> String
 treeFind _ EmptyTree = "EmptyTree"
 treeFind _ (Leaf s) = s
@@ -24,18 +33,18 @@ main = do
     -- Get command-line arguments
     args <- getArgs  
     case args of
-        [filePath] -> do
+        [id, filePath] -> do
             -- Perform parsing based on the file path
             fileContent <- readFile filePath
             let parsedContent = parseTraining fileContent
             case parsedContent of
                 Left err -> putStrLn $ "Error parsing file: " ++ show err
-                Right result -> do
-                    putStrLn $ "Done"
+                Right trainingData -> do
+                    let result = buildTree trainingData
                     print result
 
         -- when args is a list of two elements, bind the files
-        [treeFilePath, dataFilePath] -> do
+        [id, treeFilePath, dataFilePath] -> do
             -- Read and parse the tree from the tree file
             treeContent <- readFile treeFilePath
             let parsedTree = parseTree treeContent

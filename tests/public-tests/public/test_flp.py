@@ -224,7 +224,7 @@ if __name__ == "__main__":
 
             # run the inference
             os.system(
-                f"{script_path}/flp-fun {tree_file} {script_path}/values/{dataset} | tee -a flp-fun_inference_stdout.out >predictions.tmp 2>flp-fun_inference_stderr.out"
+                f"{script_path}/flp-fun -1 {tree_file} {script_path}/values/{dataset} | tee -a flp-fun_inference_stdout.out >predictions.tmp 2>flp-fun_inference_stderr.out"
             )
 
             # load the predictions and ground truth

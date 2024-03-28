@@ -1,25 +1,30 @@
-module TrainTree where
+module TrainTree(buildTree) where
 
-import DataStructures (DataSet, ValueFromDataset(..), Tree (..))
+import DataStructures (DataSet, ValueFromDataset(..), Tree (..), Row)
 import Data.List (nub, group, sort, sortBy, transpose, minimumBy)
 import Data.Function (on)
 
 
--- buildTree :: DataSet -> (Tree Integer Double)
--- -- buildTree :: DataSet -> (Double, Int, Double)
--- buildTree dataset =
---   let (thresh, attr, gini) = getGiniForDataset dataset
---       classesNames = countClasses [s | Label s <- last (transpose dataset)]
---   in 
---     if length classesNames == 1 then Leaf (fst (head classesNames)) 
---     else 
---       let leftLeafClasses = splitData dataset left
---           rightLeafClasses = splitData dataset right
---           where splitData dataset cond = 
---             | cond == left = filter (\ row |  ( (\(Numeric x) -> x) (row !! attr)) < thresh) dataset
---             | otherwise    = filter (\ row |  ( (\(Numeric x) -> x) (row !! attr)) >= thresh) dataset
-    
+{-
+Build tree function will calculate gini index for it's dataset, then
+it will split the dataset into two parts and recursively call itself.
 
+  Inputs:
+    DataSet - 2D field which contains:
+                - Doubles - [Numeric Double]
+                - Classes - [Label String]
+
+  Returns:
+    Tree - Decision tree with nodes and leaves.
+
+  Notes:
+    For each node, the dataset is split into two parts based on the threshold
+    and attribute. The threshold is calculated based on the smallest gini index.
+    The attribute is the index of the column with the smallest gini index.
+    The dataset is split into two parts based on the threshold and attribute.
+    The function is recursive and will continue to split the dataset until
+    all classes are the same.
+-}
 buildTree :: DataSet -> Tree Int Double
 buildTree dataset =
   let 
@@ -30,12 +35,10 @@ buildTree dataset =
     then Leaf (fst (head classesNames)) 
     else 
       let 
-        splitData ds cond = filter (\row -> let Numeric x = row !! attr in cond x) ds
-        leftLeafClasses = splitData dataset (< thresh)
-        rightLeafClasses = splitData dataset (>= thresh)
+        -- splitData ds cond = filter (\row -> let Numeric x = row !! attr in cond x) ds
+        leftLeafClasses  = filter (\ row -> ( (\(Numeric x) -> x) (row !! attr)) < thresh) dataset
+        rightLeafClasses = filter (\ row -> ( (\(Numeric x) -> x) (row !! attr)) >= thresh) dataset
       in Node attr thresh (buildTree leftLeafClasses) (buildTree rightLeafClasses)
-
-      
 
 
 {-
@@ -55,7 +58,6 @@ For given dataset calculate and return the smallest gini impurity with the thres
     This function is little bit complex so every line is greatly commented because i will
     forget the thought process... :)
 -}
--- getGiniForDataset :: DataSet -> (Double, Int)
 getGiniForDataset :: DataSet -> (Double, Int, Double)
 getGiniForDataset dataset =
   let 
