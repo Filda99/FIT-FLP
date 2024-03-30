@@ -1,5 +1,18 @@
 module ParseFile (parseTree, parseData, parseTraining) where
 
+{-
+ * File: parseFile.hs
+ * Author: Filip Jahn
+ * Login: xjahnf00
+ * Email: xjahnf00@stud.fit.vutbr.cz
+ * Date: 2024-03-30
+ * Description: Implementation of parsers for the input files.
+                Parsers for:
+                - Tree structure
+                - Data for classification
+                - Training data
+-}
+
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import DataStructures (Tree(..), DataSet, ValueFromDataset(..))

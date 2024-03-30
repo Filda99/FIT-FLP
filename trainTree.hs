@@ -1,5 +1,15 @@
 module TrainTree(buildTree) where
 
+{-
+ * File: trainTree.hs
+ * Author: Filip Jahn
+ * Login: xjahnf00
+ * Email: xjahnf00@stud.fit.vutbr.cz
+ * Date: 2024-03-30
+ * Description: Implementation of training decision tree.
+-}
+
+
 import DataStructures (DataSet, ValueFromDataset(..), Tree (..), Row)
 import Data.List (group, sort, sortBy, transpose, minimumBy)
 import Data.Function (on)

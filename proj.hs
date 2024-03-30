@@ -5,6 +5,19 @@ import DataStructures (Tree(..))
 import TrainTree(buildTree)
 
 {-
+ * File: proj.hs
+ * Author: Filip Jahn
+ * Login: xjahnf00
+ * Email: xjahnf00@stud.fit.vutbr.cz
+ * Date: 2024-03-30
+ * Description: Implementation of the main module.
+                Arguments parsing and processing.
+-}
+
+------------------------------------------------------------------------------------------------
+
+
+{-
 Tree find function will recursively traverse the tree based on the given data.
 
     Inputs:
@@ -36,8 +49,8 @@ main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [_, filePath] -> processFile filePath
-        [_, treeFilePath, dataFilePath] -> processFiles treeFilePath dataFilePath
+        [_, filePath] -> trainMode filePath
+        [_, treeFilePath, dataFilePath] -> classifyMode treeFilePath dataFilePath
         _ -> putStrLn "Usage of the program:\n\
         \   flp-fun -1 <file with a tree> <file with new data>\n\
         \   flp-fun -2 <file with training data>\n\
@@ -52,8 +65,8 @@ Inputs:
 Outputs: 
   None (performs IO actions - printing the trained tree).
 -}
-processFile :: String -> IO ()
-processFile filePath = 
+trainMode :: String -> IO ()
+trainMode filePath = 
     -- Read the content of the file.
     readFile filePath >>= \fileContent ->
     -- Parse the content of the file.
@@ -79,8 +92,8 @@ Inputs:
 Outputs: 
   None (performs IO actions - print the classes for the data from the data file).
 -}
-processFiles ::String -> String -> IO ()
-processFiles treeFilePath dataFilePath =
+classifyMode ::String -> String -> IO ()
+classifyMode treeFilePath dataFilePath =
     -- Read the content of the tree file.
     readFile treeFilePath >>= \treeContent ->
     -- Parse the content of the tree file.

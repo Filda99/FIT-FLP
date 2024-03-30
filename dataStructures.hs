@@ -1,5 +1,14 @@
 module DataStructures (Tree(..), DataSet, ValueFromDataset(..), Row) where
 
+{-
+ * File: dataStructures.hs
+ * Author: Filip Jahn
+ * Login: xjahnf00
+ * Email: xjahnf00@stud.fit.vutbr.cz
+ * Date: 2024-03-30
+ * Description: Data structures needed for an implementation.
+-}
+
 data Tree attr thresh = 
     EmptyTree 
     | Node attr thresh (Tree attr thresh) (Tree attr thresh) 
