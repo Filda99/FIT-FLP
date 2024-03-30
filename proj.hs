@@ -3,7 +3,6 @@ import System.Environment (getArgs)
 import ParseFile (parseTree, parseData, parseTraining)
 import DataStructures (Tree(..))
 import TrainTree(buildTree)
-import Control.Monad (forM_)
 
 {-
 Tree find function will recursively traverse the tree based on the given data.
@@ -15,13 +14,17 @@ Tree find function will recursively traverse the tree based on the given data.
     Returns:
         String - The class name which is found in the tree.
 -}
-treeFind :: (Ord a, Integral attr) => [a] -> Tree attr a -> String
+treeFind :: (Ord a, Integral attr, Num a) => [a] -> Tree attr a -> String
 treeFind _ EmptyTree = "EmptyTree"
 treeFind _ (Leaf s) = s
-treeFind all@(x:xs) (Node attr thresh leftTree rightTree)
-    | fromIntegral attr < 0 || fromIntegral attr >= length all = "Index out of bounds"
-    | all!!fromIntegral attr <= thresh = treeFind all leftTree
-    | otherwise = treeFind all rightTree
+treeFind doubles (Node attr thresh leftTree rightTree)
+    | null doubles = "Empty list"  -- Handling the case where the list is empty
+    | attr' < 0 || attr' >= length doubles = "Index out of bounds"
+    | doubles !! attr' <= thresh = treeFind doubles leftTree
+    | otherwise = treeFind doubles rightTree
+    where
+        attr' = fromIntegral attr
+
 
 ------------------------------------------------------------------------------------------------
 
@@ -33,8 +36,8 @@ main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [id, filePath] -> processFile filePath
-        [id, treeFilePath, dataFilePath] -> processFiles treeFilePath dataFilePath
+        [_, filePath] -> processFile filePath
+        [_, treeFilePath, dataFilePath] -> processFiles treeFilePath dataFilePath
         _ -> putStrLn "Usage of the program:\n\
         \   flp-fun -1 <file with a tree> <file with new data>\n\
         \   flp-fun -2 <file with training data>\n\

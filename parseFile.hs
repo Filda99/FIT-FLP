@@ -2,14 +2,14 @@ module ParseFile (parseTree, parseData, parseTraining) where
 
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import DataStructures (Tree(..), DataSet, ValueFromDataset(..), Row)
+import DataStructures (Tree(..), DataSet, ValueFromDataset(..))
 import Control.Applicative ((<$>), (<*>), (<*), (*>))
-import Text.Parsec
-
-import Control.Monad.IO.Class (liftIO)
-
+import Text.Parsec()
+import Control.Monad.IO.Class()
 
 
+----------------------------------------------------------------------
+-- Integer and Double parsers
 ----------------------------------------------------------------------
 
 -- Parser for attributes 
@@ -39,7 +39,7 @@ doubleParser = try scientificNotation <|> try negativeDouble <|> simpleDouble
     scientificNotation :: Parser Double
     scientificNotation =
         (\sign mantissa decimals exponent' ->
-            let result = read mantissa * (10 ** fromIntegral exponent' + read decimals / (10 ** fromIntegral (length decimals)))
+            let result = read mantissa * (10.0 ** fromIntegral (exponent' :: Int) + read decimals / (10.0 ** fromIntegral (length decimals :: Int)))
             in if sign == '-' then negate result else result
         )
         <$> option ' ' (char '-')
@@ -50,10 +50,13 @@ doubleParser = try scientificNotation <|> try negativeDouble <|> simpleDouble
 
 
 ----------------------------------------------------------------------
+-- Tree parsers
+----------------------------------------------------------------------
 
 -- Parser for leaf nodes, allowing spaces before "Leaf"
 leafParser :: Parser (Tree Integer Double)
 leafParser = Leaf <$> (spaces *> string "Leaf: " *> many1 (noneOf "\n"))
+
 
 -- Parser for node constructs, allowing variable spaces before "Node"
 nodeParser :: Parser (Tree Integer Double)
@@ -67,15 +70,32 @@ treeParser :: Parser (Tree Integer Double)
 treeParser = skipMany (skipMany1 newline *> spaces) *> (try nodeParser <|> leafParser <|> return EmptyTree)
   
 
+-- Top-level parser to parse the entire tree input
+parseTree :: String -> Either ParseError (Tree Integer Double)
+parseTree input = parse (treeParser <* (skipMany (skipMany1 newline *> spaces)) <* eof) "" input
+
+
+----------------------------------------------------------------------
+-- Data parsers
+----------------------------------------------------------------------
+
 -- Parser for the tree structure
 dataParser :: Parser [Double]
 dataParser = skipMany (skipMany1 newline *> spaces) *> (doubleParser `sepBy` char ',')
 
+
+-- Top-level parser to parse the entire classification input
+parseData :: String -> Either ParseError [Double]
+parseData input = parse (dataParser <* (skipMany (skipMany1 newline *> spaces)) <* eof) "" input
+
+
+----------------------------------------------------------------------
+-- Training data parsers
 ----------------------------------------------------------------------
 
 -- Define the Parser for ValueFromDataset
 valueParser :: Parser ValueFromDataset
-valueParser = try doubleNumeric <|> label
+valueParser = try doubleNumeric <|> myLabel
   where
     doubleNumeric :: Parser ValueFromDataset
     doubleNumeric =
@@ -83,35 +103,22 @@ valueParser = try doubleNumeric <|> label
       optionMaybe (lookAhead (char ',')) >>= \hasComma ->
       case hasComma of
         Just _  -> return (Numeric num)
-        Nothing -> label
+        Nothing -> myLabel
 
-    label :: Parser ValueFromDataset
-    label = Label <$> many1 (noneOf ",\n")
+    myLabel :: Parser ValueFromDataset
+    myLabel = Label <$> many1 (noneOf ",\n")
+
 
 -- Define the row parser
 rowParser :: Parser [ValueFromDataset]
 rowParser = valueParser `sepBy` char ','
+
 
 -- Parse the dataset
 datasetParser :: Parser [[ValueFromDataset]]
 datasetParser = endBy rowParser newline <* optional newline -- Adjusted to consume extra newlines
 
 
-
-----------------------------------------------------------------------
-
--- Top-level parser to parse the entire tree input
-parseTree :: String -> Either ParseError (Tree Integer Double)
-parseTree input = parse (treeParser <* (skipMany (skipMany1 newline *> spaces)) <* eof) "" input
-
--- Top-level parser to parse the entire classification input
-parseData :: String -> Either ParseError [Double]
-parseData input = parse (dataParser <* (skipMany (skipMany1 newline *> spaces)) <* eof) "" input
-
 -- Top-level parser to parse the entire training input
 parseTraining :: String -> Either ParseError DataSet
 parseTraining input = parse (skipMany (skipMany1 newline *> spaces) *> datasetParser <* eof) "" input
-
-
-
-

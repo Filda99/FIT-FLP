@@ -1,7 +1,7 @@
 module TrainTree(buildTree) where
 
 import DataStructures (DataSet, ValueFromDataset(..), Tree (..), Row)
-import Data.List (nub, group, sort, sortBy, transpose, minimumBy)
+import Data.List (group, sort, sortBy, transpose, minimumBy)
 import Data.Function (on)
 
 
