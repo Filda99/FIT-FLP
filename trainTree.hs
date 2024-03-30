@@ -29,15 +29,15 @@ buildTree :: DataSet -> Tree Int Double
 buildTree dataset =
   let 
     (thresh, attr, gini) = getGiniForDataset dataset
+    -- Get all class names from the last column
     classesNames = countClasses [s | Label s <- last (transpose dataset)]
   in 
     if length classesNames == 1 
     then Leaf (fst (head classesNames)) 
     else 
       let 
-        -- splitData ds cond = filter (\row -> let Numeric x = row !! attr in cond x) ds
-        leftLeafClasses  = filter (\ row -> ( (\(Numeric x) -> x) (row !! attr)) < thresh) dataset
-        rightLeafClasses = filter (\ row -> ( (\(Numeric x) -> x) (row !! attr)) >= thresh) dataset
+        leftLeafClasses  = filter (\ row -> ( (\(Numeric x) -> x) (row !! attr) ) < thresh) dataset
+        rightLeafClasses = filter (\ row -> ( (\(Numeric x) -> x) (row !! attr) ) >= thresh) dataset
       in Node attr thresh (buildTree leftLeafClasses) (buildTree rightLeafClasses)
 
 
@@ -169,8 +169,8 @@ Calculation of total gini impurity for selected threshold.
 -}
 calcThreshImpurity :: [(Double, String)] -> Double -> Double
 calcThreshImpurity pairs threshold =
-  -- Na zaklade hodnoty v pair (porovnani s threshold) vytvor dva 
-  -- listy (left a right), ve kterych budou jenom tridy
+  -- Based on the value in the pair (compared to the threshold), 
+  -- create two lists (left and right) with only classes
   let leftLeafClasses = [cls | (val, cls) <- pairs, val < threshold]
       rightLeafClasses = [cls | (val, cls) <- pairs, val >= threshold]
       leftLeafNoDuplicates = countClasses leftLeafClasses
@@ -200,7 +200,7 @@ Calculation of Gini impurity for one leaf.
 -}
 calcLeafImpurity :: [(String, Integer)] -> Double
 calcLeafImpurity pair =
-  let listOfClasses = map snd pair -- [0, 1] zastoupeni trid
+  let listOfClasses = map snd pair -- [0, 1] for example
       numberOfClasses = fromIntegral $ sum listOfClasses -- Convert to Double for floating-point division
 
       classesProbabilities = map (\x -> (fromIntegral x / numberOfClasses) ** 2) listOfClasses

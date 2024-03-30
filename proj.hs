@@ -28,39 +28,87 @@ treeFind all@(x:xs) (Node attr thresh leftTree rightTree)
 cleanString :: String -> String
 cleanString str = filter (`notElem` ['\r', '\"']) str
 
+
 main :: IO ()
 main = do
-    -- Get command-line arguments
-    args <- getArgs  
+    args <- getArgs
     case args of
-        [id, filePath] -> do
-            -- Perform parsing based on the file path
-            fileContent <- readFile filePath
-            let parsedContent = parseTraining fileContent
-            case parsedContent of
-                Left err -> putStrLn $ "Error parsing file: " ++ show err
-                Right trainingData -> do
-                    let result = buildTree trainingData
-                    print result
+        [id, filePath] -> processFile filePath
+        [id, treeFilePath, dataFilePath] -> processFiles treeFilePath dataFilePath
+        _ -> putStrLn "Usage of the program:\n\
+        \   flp-fun -1 <file with a tree> <file with new data>\n\
+        \   flp-fun -2 <file with training data>\n\
+        \"
 
-        -- when args is a list of two elements, bind the files
-        [id, treeFilePath, dataFilePath] -> do
-            -- Read and parse the tree from the tree file
-            treeContent <- readFile treeFilePath
-            let parsedTree = parseTree treeContent
-            
-            case parsedTree of
-                Left err -> print $ "Error parsing tree: " ++ show err
-                Right tree -> do
-                    -- If the tree is successfully parsed, proceed to parse the data
-                    dataContent <- readFile dataFilePath
-                    let dataLines = lines dataContent
-                    forM_ dataLines $ \line -> do
-                        let parsedData = parseData line
-                        case parsedData of
-                            Left err -> print $ "Error parsing data: " ++ show err
-                            Right dataValues -> do
-                                let result = treeFind dataValues tree
-                                print $ cleanString result  -- Clean and print the result
-        _ -> putStrLn "Usage: program <tree file path> <data file path>"
+{- 
+Process a single file (training data).
 
+Inputs: 
+  filePath: Path to the file to be processed.
+
+Outputs: 
+  None (performs IO actions - printing the trained tree).
+-}
+processFile :: String -> IO ()
+processFile filePath = 
+    -- Read the content of the file.
+    readFile filePath >>= \fileContent ->
+    -- Parse the content of the file.
+    let parsedContent = parseTraining fileContent
+    in case parsedContent of
+        -- If parsing fails, print an error message.
+        Left err -> putStrLn $ "Error parsing file: " ++ show err
+        -- If parsing succeeds, build a tree and print the result.
+        Right trainingData ->
+            let result = buildTree trainingData
+            in print result
+
+{- 
+Process multiple files (when tree and data are in separate files).
+At first process the tree file, build a tree and save it to internal representation.
+Then process the data file, parse the data and find the class in the tree.
+Then print the cleaned result which are the classes for data provided based on 
+the tree.
+
+Inputs: 
+  treeFilePath: Path to the file containing tree data.
+  dataFilePath: Path to the file containing data to be processed.
+Outputs: 
+  None (performs IO actions - print the classes for the data from the data file).
+-}
+processFiles ::String -> String -> IO ()
+processFiles treeFilePath dataFilePath =
+    -- Read the content of the tree file.
+    readFile treeFilePath >>= \treeContent ->
+    -- Parse the content of the tree file.
+    let parsedTree = parseTree treeContent
+    in case parsedTree of
+        -- If parsing fails, print an error message.
+        Left err -> print $ "Error parsing tree: " ++ show err
+        -- If parsing succeeds, process the data file.
+        Right tree ->
+            -- Read the content of the data file.
+            {-
+            The result of IO action is passed to the function on the right side
+            as an argument. 
+            -}
+            readFile dataFilePath >>= \dataContent ->
+            -- Split the data file into lines.
+            let dataLines = lines dataContent
+            -- Process each line of data.
+            {-
+            mapM_ is a monadic version of map. It applies the function to each element/line.
+            From the list (dataLines) take line by line and apply the function on the right side.
+            Performs the finding of the class in the tree and prints the cleaned result.
+            -}
+            in mapM_ (\line ->
+                -- Parse the data line.
+                let parsedData = parseData line
+                in case parsedData of
+                    -- If parsing fails, print an error message.
+                    Left err -> print $ "Error parsing data: " ++ show err
+                    -- If parsing succeeds, find data in the tree and print the cleaned result.
+                    Right dataValues ->
+                        let result = treeFind dataValues tree
+                        in print $ cleanString result
+            ) dataLines
