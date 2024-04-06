@@ -148,6 +148,30 @@ remove_duplicate_paths(Paths, UniquePaths) :-
     list_to_set(Paths, UniquePaths).
 
 
+
+/************************************************************************/
+/** Vypis */
+
+
+% Convert a path represented as a list of edges to a string of connected nodes
+path_to_string([], '').
+path_to_string([[Node1, Node2]|Rest], String) :-
+    atomic_list_concat([Node1, '-', Node2], '', EdgeString),
+    path_to_string(Rest, RestString),
+    atomic_list_concat([EdgeString, ' ', RestString], String).
+
+% Convert a list of paths to a list of strings of connected nodes
+paths_to_strings([], []).
+paths_to_strings([Path|Paths], [String|Strings]) :-
+    path_to_string(Path, String),
+    paths_to_strings(Paths, Strings).
+
+% Rewrite the list of paths into the specified form
+rewrite_paths(Paths, Result) :-
+    paths_to_strings(Paths, Strings),
+    atomic_list_concat(Strings, '\n', Result).
+
+
 /************************************************************************/
 /** Hlavni funkce */
 
@@ -170,6 +194,8 @@ main :-
     sort_cycle(Results, SortedPairs),
     sort_paths_by_first_element(SortedPairs, SortedPaths),
     remove_duplicate_paths(SortedPaths, FilteredPaths),
-    write(FilteredPaths),
+    rewrite_paths(FilteredPaths, Result),
+    write(Result),
+    write('\n'),
 
     halt.
