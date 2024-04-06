@@ -1,8 +1,0 @@
-Node: 0, 3.0
-  Leaf: TridaA
-  Node: 0, 4.6
-    Leaf: TridaB
-    Node: 0, 6.199999999999999
-      Leaf: TridaB
-      Leaf: TridaC
-      Left: TridaD
