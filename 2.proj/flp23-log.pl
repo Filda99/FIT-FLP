@@ -12,6 +12,7 @@
 /************************************************************************/
 /** Nacteni vstupu */
 
+
 /** Zkopirovano z: input2.pl (https://moodle.vut.cz/pluginfile.php/848652/mod_resource/content/1/input2.pl)*/
 /** cte radky ze standardniho vstupu, konci na LF nebo EOF */
 read_line(L,C) :-
@@ -49,6 +50,7 @@ split_lines([L|Ls],[H|T]) :- split_lines(Ls,T), split_line(L,H).
 /************************************************************************/
 /** Vytvareni hran a uzlu */
 
+
 /** Vytvori hranu */
 create_edges([]).
 create_edges([[[X],[Y]]|T]) :- 
@@ -78,17 +80,37 @@ create_nodes([[[X],[Y]]|T]) :-
 /************************************************************************/
 /** Hammiltonovska kruznice */
 
+
+/** 
+    * Vytvori hammiltonovskou kruznici
+    * @param StartingNode   pocatecni uzel
+    * @param CurrentNode    aktualni uzel
+    * @param CurrentPath    aktualni cesta
+    * @param VisitedNodes   jiz navstivene uzly
+    * @param Result         vysledna cesta
+
+    * Funkce postupne prochazi graf, dokud nejsou vsechny uzly projite,
+    uklada si postupne cestu a rekurzivne vola sebe sama.
+*/
 hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, Result) :-
     \+ are_all_nodes_visited(VisitedNodes),
     edge(CurrentNode, NextNode),
     \+ member(NextNode, VisitedNodes),
-    append(CurrentPath, [CurrentNode, NextNode], NewPath),
+    append(CurrentPath, [[CurrentNode, NextNode]], NewPath),
     hammilton_cycle(StartingNode, NextNode, NewPath, [NextNode|VisitedNodes], Result).
 
-hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, NewPath) :-
+/**
+    * Posledni usek - z posledniho uzlu do pocatecniho
+    * @param StartingNode   pocatecni uzel
+    * @param CurrentNode    aktualni uzel
+    * @param CurrentPath    aktualni cesta
+    * @param VisitedNodes   jiz navstivene uzly
+    * @param Result         vysledna cesta
+*/
+hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, Result) :-
     are_all_nodes_visited(VisitedNodes),
     edge(CurrentNode, StartingNode),
-    append(CurrentPath, [CurrentNode, StartingNode], NewPath).
+    append(CurrentPath, [[CurrentNode, StartingNode]], Result).
 
 are_all_nodes_visited(VisitedNodes) :-
     findall(Node, node(Node), Nodes),
@@ -97,12 +119,38 @@ are_all_nodes_visited(VisitedNodes) :-
     TotalNodes = VisitedCount.
 
 find_hammilton_cycle(StartNode, Result) :-
-    retractall(visited_nodes(_)),
-    assert(visited_nodes(StartNode)),
     hammilton_cycle(StartNode, StartNode, [], [StartNode], Result).
+
+
+/************************************************************************/
+/** Sorting and removing duplicates */
+
+
+% Sort pairs alphabetically
+sort_cycle([], []).
+sort_cycle([Cycle|Rest], [SortedCycle|SortedRest]) :-
+    maplist(sort, Cycle, SortedCycle),
+    sort_cycle(Rest, SortedRest).
+
+% Define a predicate to compare two pairs based on the first element
+compare_first_element(<, [X1,_], [Y1,_]) :- X1 @< Y1.
+compare_first_element(>, [X1,_], [Y1,_]) :- X1 @> Y1.
+compare_first_element(=, [X1,_], [Y1,_]) :- X1 == Y1.
+
+% Predicate to sort a list of paths based on the first element of each pair
+sort_paths_by_first_element([], []).
+sort_paths_by_first_element([Path|Paths], [SortedPath|SortedPaths]) :-
+    msort(Path, SortedPath),
+    sort_paths_by_first_element(Paths, SortedPaths).
+
+% Remove duplicate paths from a list
+remove_duplicate_paths(Paths, UniquePaths) :-
+    list_to_set(Paths, UniquePaths).
+
 
 /************************************************************************/
 /** Hlavni funkce */
+
 
 main :-
     prompt(_, ''),
@@ -118,7 +166,10 @@ main :-
     listing(node),
     
     findall(Result, find_hammilton_cycle('A', Result), Results),
-    % write_solution(Results),
-    write(Results),
+    % write(Results),
+    sort_cycle(Results, SortedPairs),
+    sort_paths_by_first_element(SortedPairs, SortedPaths),
+    remove_duplicate_paths(SortedPaths, FilteredPaths),
+    write(FilteredPaths),
 
     halt.
