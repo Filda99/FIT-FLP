@@ -45,36 +45,61 @@ split_line([H|T], [[H|G]|S1]) :- split_line(T,[G|S1]). % G je prvni seznam ze se
 split_lines([],[]).
 split_lines([L|Ls],[H|T]) :- split_lines(Ls,T), split_line(L,H).
 
-/************************************************************************/
 
 /************************************************************************/
 /** Vytvareni hran a uzlu */
 
 /** Vytvori hranu */
 create_edges([]).
-create_edges([[X,Y]|T]) :- 
+create_edges([[[X],[Y]]|T]) :- 
     (edge(X, Y); edge(Y, X)),
     create_edges(T).
-create_edges([[X,Y]|T]) :- 
+create_edges([[[X],[Y]]|T]) :- 
     assertz(edge(X,Y)), assertz(edge(Y,X)), create_edges(T).
 
 /** Vytvori uzel */
 % Musime zajistit, aby vkladany uzel jeste nebyl v databazi
 create_nodes([]).
-% Pokud uzel existuje, tak ho nevkladame
-create_nodes([[X,Y]|T]) :- 
+% Pokud uzel existuje, tak ho nevkladame. Funkce je zde kvuli rekurzi (rekurze by se jinak zacyklila)
+create_nodes([[[X],[Y]]|T]) :- 
     node(X), % Check if node(X) is true
     create_nodes(T),
     node(Y), % Check if node(Y) is true
     create_nodes(T).
 % Pokud uzel neexistuje, tak ho vlozime
-create_nodes([[X,Y]|T]) :- 
+create_nodes([[[X],[Y]]|T]) :- 
     \+ node(X), % Check if node(X) is false
     assertz(node(X)), 
     \+ node(Y), % Check if node(Y) is false
     assertz(node(Y)),
     create_nodes(T).
 
+
+/************************************************************************/
+/** Hammiltonovska kruznice */
+
+hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, Result) :-
+    \+ are_all_nodes_visited(VisitedNodes),
+    edge(CurrentNode, NextNode),
+    \+ member(NextNode, VisitedNodes),
+    append(CurrentPath, [CurrentNode, NextNode], NewPath),
+    hammilton_cycle(StartingNode, NextNode, NewPath, [NextNode|VisitedNodes], Result).
+
+hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, NewPath) :-
+    are_all_nodes_visited(VisitedNodes),
+    edge(CurrentNode, StartingNode),
+    append(CurrentPath, [CurrentNode, StartingNode], NewPath).
+
+are_all_nodes_visited(VisitedNodes) :-
+    findall(Node, node(Node), Nodes),
+    length(Nodes, TotalNodes),
+    length(VisitedNodes, VisitedCount),
+    TotalNodes = VisitedCount.
+
+find_hammilton_cycle(StartNode, Result) :-
+    retractall(visited_nodes(_)),
+    assert(visited_nodes(StartNode)),
+    hammilton_cycle(StartNode, StartNode, [], [StartNode], Result).
 
 /************************************************************************/
 /** Hlavni funkce */
@@ -90,4 +115,10 @@ main :-
     listing(edge),
 
     create_nodes(S),
-    listing(node).
+    listing(node),
+    
+    findall(Result, find_hammilton_cycle('A', Result), Results),
+    % write_solution(Results),
+    write(Results),
+
+    halt.
