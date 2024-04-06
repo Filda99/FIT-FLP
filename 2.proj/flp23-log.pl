@@ -62,12 +62,17 @@ create_edges([[X,Y]|T]) :-
 % Musime zajistit, aby vkladany uzel jeste nebyl v databazi
 create_nodes([]).
 % Pokud uzel existuje, tak ho nevkladame
-create_nodes([[X,_]|T]) :- 
+create_nodes([[X,Y]|T]) :- 
     node(X), % Check if node(X) is true
+    create_nodes(T),
+    node(Y), % Check if node(Y) is true
     create_nodes(T).
 % Pokud uzel neexistuje, tak ho vlozime
-create_nodes([[X,_]|T]) :- 
+create_nodes([[X,Y]|T]) :- 
+    \+ node(X), % Check if node(X) is false
     assertz(node(X)), 
+    \+ node(Y), % Check if node(Y) is false
+    assertz(node(Y)),
     create_nodes(T).
 
 
