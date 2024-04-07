@@ -1,0 +1,7 @@
+A A
+
+test solution:
+A
+
+print solution:
+A-A

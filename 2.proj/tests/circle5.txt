@@ -1,0 +1,13 @@
+D E
+A B
+B C
+C D
+E A
+E D
+D C
+
+test solution:
+A B C D E
+
+print solution:
+A-B D-E A-E B-C C-D

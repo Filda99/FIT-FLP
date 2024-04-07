@@ -1,0 +1,31 @@
+{-|
+  Function: functionName
+  Description: Briefly describes what the function does, its purpose, or its behavior.
+
+  Parameters:
+    - paramName1: Description of the first parameter, its expectations, or any relevant details.
+    - paramName2: Description of the second parameter, and so on.
+
+  Returns: Description of the return value and its meaning.
+
+  Preconditions: (Optional) Describes any preconditions that must be true for the function to execute correctly.
+  Postconditions: (Optional) Describes the state of the system or the return value after the function has executed.
+  Side effects: (Optional) Mention if the function has any side effects, like modifying a global variable or performing IO operations.
+
+  Examples:
+    - `functionName paramValue1 paramValue2` -- Expected result or behavior
+    - `functionName anotherParamValue1 anotherParamValue2` -- Another expected result or behavior
+
+  Notes: (Optional) Any additional information, considerations, or context that might be helpful for understanding the function.
+-}
+
+testDataset = [[Numeric 1.0, Numeric 2.0, Numeric 0.1, Label "A"], [Numeric 1.5, Numeric 3.5, Numeric 0.7, Label "A"]]
+
+
+            [
+              [(1.0,"A"),(1.5,"B"),(2.0,"A"),(2.5,"B"),(3.0,"A"),(3.5,"B")],
+              [(2.0,"A"),(3.5,"B"),(2.5,"A"),(3.0,"B"),(1.5,"A"),(2.0,"B")],
+              [(0.1,"A"),(0.7,"B"),(0.2,"A"),(0.8,"B"),(0.3,"A"),(0.9,"B")]]
+
+
+testDataset = [[Numeric 2.4, Numeric 1.3, Label "TridaA"], [Numeric 6.1, Numeric 0.3, Label "TridaB"], [Numeric 6.3, Numeric 4.4, Label "TridaC"], [Numeric 2.9, Numeric 4.4, Label "TridaA"], [Numeric 3.1, Numeric 2.9, Label "TridaB"]]

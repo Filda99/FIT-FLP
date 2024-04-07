@@ -1,0 +1,7 @@
+A B
+
+test solution:
+A B
+
+print solution:
+A-B B-A
