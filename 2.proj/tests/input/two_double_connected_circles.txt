@@ -6,9 +6,3 @@ C A
 C B
 B A
 A E
-
-test solution:
-A B C D F E
-
-print solution:
-A-B B-C C-D D-F F-E E-A

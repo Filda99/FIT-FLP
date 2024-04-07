@@ -4,9 +4,3 @@ A B
 B A
 C A
 A C
-
-test solution:
-A B C
-
-print solution:
-A-B B-C C-A

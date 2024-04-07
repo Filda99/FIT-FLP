@@ -5,7 +5,3 @@ F D
 C A
 C B
 B A
-
-test solution:
-
-print solution:
