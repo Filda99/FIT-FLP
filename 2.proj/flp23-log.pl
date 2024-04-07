@@ -60,21 +60,6 @@ create_edges([[[X],[Y]]|T]) :-
     assertz(edge(X,Y)), assertz(edge(Y,X)), create_edges(T).
 
 /** Vytvori uzel */
-% Musime zajistit, aby vkladany uzel jeste nebyl v databazi
-% create_nodes([]).
-% % Pokud uzel existuje, tak ho nevkladame. Funkce je zde kvuli rekurzi (rekurze by se jinak zacyklila)
-% create_nodes([[[X],[Y]]|T]) :- 
-%     node(X), % Check if node(X) is true
-%     create_nodes(T),
-%     node(Y), % Check if node(Y) is true
-%     create_nodes(T).
-% % Pokud uzel neexistuje, tak ho vlozime
-% create_nodes([[[X],[Y]]|T]) :- 
-%     \+ node(X), % Check if node(X) is false
-%     assert(node(X)), 
-%     \+ node(Y), % Check if node(Y) is false
-%     assert(node(Y)),
-%     create_nodes(T).
 create_nodes([]).
 create_nodes([[[X], [Y]] | Rest]) :-
     (   node(X), node(Y) -> true
