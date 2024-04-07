@@ -99,6 +99,7 @@ hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, Result) :-
     append(CurrentPath, [[CurrentNode, NextNode]], NewPath),
     hammilton_cycle(StartingNode, NextNode, NewPath, [NextNode|VisitedNodes], Result).
 
+
 /**
     * Posledni usek - z posledniho uzlu do pocatecniho
     * @param StartingNode   pocatecni uzel
@@ -112,11 +113,13 @@ hammilton_cycle(StartingNode, CurrentNode, CurrentPath, VisitedNodes, Result) :-
     edge(CurrentNode, StartingNode),
     append(CurrentPath, [[CurrentNode, StartingNode]], Result).
 
+
 are_all_nodes_visited(VisitedNodes) :-
     findall(Node, node(Node), Nodes),
     length(Nodes, TotalNodes),
     length(VisitedNodes, VisitedCount),
     TotalNodes = VisitedCount.
+
 
 find_hammilton_cycle(StartNode, Result) :-
     hammilton_cycle(StartNode, StartNode, [], [StartNode], Result).

@@ -1,7 +1,8 @@
-A A
+A B
+B A
 
 test solution:
-A
+B A
 
 print solution:
-A-A
+B-A A-B

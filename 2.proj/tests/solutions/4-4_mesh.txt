@@ -1,0 +1,40 @@
+A E
+A B
+B F
+B C
+C G
+C D
+D H
+E I
+E F
+F J
+F G
+G K
+G H
+H L
+I M
+I J
+J N
+J K
+K O
+K L
+L P
+M N
+N O
+O P
+
+test solution:
+F B A E I M N O P L H D C G K J
+J I M N O P L H D C B A E F G K
+K L P O N M I E A B C D H G F J
+K O P L H D C B A E I M N J F G
+J I M N O P L K G H D C B A E F
+F B A E I M N J K O P L H D C G
+
+print solution:
+F-B B-A A-E E-I I-M M-N N-O O-P P-L L-H H-D D-C C-G G-K K-J J-F
+J-I I-M M-N N-O O-P P-L L-H H-D D-C C-B B-A A-E E-F F-G G-K K-J
+K-L L-P P-O O-N N-M M-I I-E E-A A-B B-C C-D D-H H-G G-F F-J J-K
+K-O O-P P-L L-H H-D D-C C-B B-A A-E E-I I-M M-N N-J J-F F-G G-K
+J-I I-M M-N N-O O-P P-L L-K K-G G-H H-D D-C C-B B-A A-E E-F F-J
+F-B B-A A-E E-I I-M M-N N-J J-K K-O O-P P-L L-H H-D D-C C-G G-F
