@@ -187,11 +187,11 @@ main :-
     % write('\n'),
 
     create_edges(S),
-    listing(edge),
+    % listing(edge),
 
     create_nodes(S),
     remove_duplicates,
-    listing(node),
+    % listing(node),
     
     findall(Result, find_hammilton_cycle('A', Result), Results),
     % write(Results),
@@ -200,6 +200,6 @@ main :-
     remove_duplicate_paths(SortedPaths, FilteredPaths),
     rewrite_paths(FilteredPaths, Result),
     write(Result),
-    write('\n'),
+    % write('\n'),
 
     halt.

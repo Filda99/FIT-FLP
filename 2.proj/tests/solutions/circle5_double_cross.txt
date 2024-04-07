@@ -1,4 +1,4 @@
-A-B A-E B-C C-D D-E
-A-D A-E B-C B-D C-E
-A-B A-E B-D C-D C-E
+A-B A-E B-C C-D D-E 
 A-B A-D B-C C-E D-E
+A-B A-E B-D C-D C-E
+A-D A-E B-C B-D C-E
