@@ -1,8 +1,0 @@
-graph:
-A B
-C D
-B C
-
-test solution:
-
-print solution:

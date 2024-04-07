@@ -1,21 +1,4 @@
-A B
-B C
-C D
-D E
-E A
-A D
-E C
-B D
-
-          
-test solution:
-A B C D E
-A D B C E
-A B D C E
-A B C E D
-
-print solution:
-A-B B-C C-D D-E E-A
-A-D D-B B-C C-E E-A
-A-B B-D D-C C-E E-A
-A-B B-C C-E E-D D-A
+A-B A-E B-C C-D D-E
+A-D A-E B-C B-D C-E
+A-B A-E B-D C-D C-E
+A-B A-D B-C C-E D-E

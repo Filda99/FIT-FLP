@@ -1,14 +1,1 @@
-C D
-B C
-C B
-A B
-B A
-D A
-A A
-D D
-
-test solution:
-A B C D
-
-print solution:
-A-B B-C C-D D-A
+A-B A-D B-C C-D
