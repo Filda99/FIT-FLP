@@ -61,21 +61,36 @@ create_edges([[[X],[Y]]|T]) :-
 
 /** Vytvori uzel */
 % Musime zajistit, aby vkladany uzel jeste nebyl v databazi
+% create_nodes([]).
+% % Pokud uzel existuje, tak ho nevkladame. Funkce je zde kvuli rekurzi (rekurze by se jinak zacyklila)
+% create_nodes([[[X],[Y]]|T]) :- 
+%     node(X), % Check if node(X) is true
+%     create_nodes(T),
+%     node(Y), % Check if node(Y) is true
+%     create_nodes(T).
+% % Pokud uzel neexistuje, tak ho vlozime
+% create_nodes([[[X],[Y]]|T]) :- 
+%     \+ node(X), % Check if node(X) is false
+%     assert(node(X)), 
+%     \+ node(Y), % Check if node(Y) is false
+%     assert(node(Y)),
+%     create_nodes(T).
 create_nodes([]).
-% Pokud uzel existuje, tak ho nevkladame. Funkce je zde kvuli rekurzi (rekurze by se jinak zacyklila)
-create_nodes([[[X],[Y]]|T]) :- 
-    node(X), % Check if node(X) is true
-    create_nodes(T),
-    node(Y), % Check if node(Y) is true
-    create_nodes(T).
-% Pokud uzel neexistuje, tak ho vlozime
-create_nodes([[[X],[Y]]|T]) :- 
-    \+ node(X), % Check if node(X) is false
-    assertz(node(X)), 
-    \+ node(Y), % Check if node(Y) is false
-    assertz(node(Y)),
-    create_nodes(T).
+create_nodes([[[X], [Y]] | Rest]) :-
+    (   node(X), node(Y) -> true
+    ;   assert(node(X)), assert(node(Y))
+    ),
+    create_nodes(Rest).
 
+remove_duplicates :-
+    setof(X, node(X), Nodes),
+    retractall(node(_)),
+    assert_nodes(Nodes).
+
+assert_nodes([]).
+assert_nodes([Node|Rest]) :-
+    assertz(node(Node)),
+    assert_nodes(Rest).
 
 /************************************************************************/
 /** Hammiltonovska kruznice */
@@ -190,6 +205,7 @@ main :-
     listing(edge),
 
     create_nodes(S),
+    remove_duplicates,
     listing(node),
     
     findall(Result, find_hammilton_cycle('A', Result), Results),
