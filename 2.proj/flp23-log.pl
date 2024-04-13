@@ -193,7 +193,10 @@ main :-
     remove_duplicates,
     % listing(node),
     
-    findall(Result, find_hammilton_cycle('A', Result), Results),
+    % Získání prvního uzlu z databáze uzlů
+    node(StartNode),
+    
+    findall(Result, find_hammilton_cycle(StartNode, Result), Results),
     % write(Results),
     sort_cycle(Results, SortedPairs),
     sort_paths_by_first_element(SortedPairs, SortedPaths),
